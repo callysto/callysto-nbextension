@@ -8,20 +8,20 @@ with open("LICENSE") as f:
     license = f.read()
 
 setup(
-    name="CallystoNBExtension",
-    version="0.1.0",
+    name="callystonb",
+    version="0.1.1",
     description="Callysto notebook extension",
     long_description=readme,
     author="Ian Allison",
     author_email="iana@pims.math.ca",
-    url="https://github.com/callysto/callysto-nbextension",
+    url="https://github.com/callysto/callystonb",
     license=license,
     packages=find_packages(exclude=("tests", "docs")),
     include_package_data=True,
     data_files=[
         (
-            "share/jupyter/nbextensions/callysto-nbextension",
-            ["callysto-nbextension/static/index.js"],
+            "share/jupyter/nbextensions/callystonb",
+            ["callystonb/static/index.js"],
         )
     ],
     zip_safe=False,

@@ -1,3 +1,2 @@
-recursive-include nbviewer_publish/jupyter-config *.json
-recursive-include nbviewer_publish/static *.js
+recursive-include callystonb/static *.js
 incude LICENSE
