@@ -1,0 +1,3 @@
+recursive-include nbviewer_publish/jupyter-config *.json
+recursive-include nbviewer_publish/static *.js
+incude LICENSE
