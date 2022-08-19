@@ -45,8 +45,11 @@ define([
             url: params.user_table_endpoint + '/items/' + user,
             type: 'GET',
             success: function(data) {
-                $('#ca-migrate')
-                    .css('background-color', 'green');
+                var response = Object.keys(data);
+                if (data.Item !== undefined) {
+                    $('#ca-migrate')
+                        .css('background-color', 'yellowgreen');
+                }
             }
         });
     };
