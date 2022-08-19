@@ -112,6 +112,7 @@ define([
                 buttons: {
                     'Migrate Me!': {
                         class: 'btn-primary',
+                        id: 'migrate',
                         click: function() {
                             modal.find('.btn').prop('disabled', true);
                             var new_data = {
@@ -122,18 +123,20 @@ define([
                             $.extend(
                                 new_data
                             );
-                            // prevent the modal from closing. See github.com/twbs/bootstrap/issues/1202
-                            modal.data('bs.modal').isShown = false;
-                            //var spinner = modal.find('.btn-primary').addClass('fa-spin');
+                          
+                            
+                            // prevent the modal from closing to show status
+                            $('.btn-primary').removeAttr('data-dismiss');
                             migrate_user(function(jqXHR, textStatus) {
-                                modal.find('.btn').prop('disabled', false);
-                                // allow the modal to close again. See github.com/twbs/bootstrap/issues/1202
-                                //modal.data('bs.modal').isShown = true;
-                                //spinner.removeClass('fa-spin');
+                                // allow closing again
+                                $('#migrate').attr('disabled', 'disabled');
+                                $('#done').removeAttr('disabled', 'disabled');
                             });
                         }
                     },
-                    done: {}
+                    done: {
+                        id: 'done'
+                    }
                 }
             })
             .attr('id', 'migrate_user_modal')
@@ -166,10 +169,9 @@ define([
         console.log('Migrating the user...');
         $.ajax({
             url: params.user_table_endpoint + '/items',
-            type: 'PUT',
+            type: 'POST',
             dataType: 'json',
             data: JSON.stringify(data),
-            //beforeSend: add_auth_token,  ! Not needed if we proxy
             success: migrate_success,
             error: migrate_error,
             complete: complete_callback
