@@ -1,9 +1,13 @@
 define([
+    'require',
+    'jquery',
     'base/js/namespace',
     'base/js/promises',
     'base/js/utils',
     'base/js/dialog'
-], function(
+], function (
+    requirejs,
+    $,
     Jupyter,
     promises,
     utils,
@@ -16,7 +20,6 @@ define([
     };
 
     var initialize = function() {
-        console.log('initializing callysto extension');
         var action = {
             icon: 'fa-plane',
             handler: migrate_dialog,
@@ -238,12 +241,16 @@ define([
 
     function migrate_error(jqXHR, textStatus, errorThrown) {
         console.log('Callysto migrate error: ', jqXHR, textStatus, errorThrown);
+        var d = new Date();
+        var msg_head = d.toLocaleString() + ': migration request failed';
         var alert = build_alert('alert-danger')
             .hide()
-            .alert(
-                $('<p/>').text(jqXHR.responseJSON ? JSON.stringify(jqXHR.responseJSON, null, 2) : errorThrown)
+            .append(msg_head)
+            .append(
+                $('<pre/>').text(jqXHR.responseJSON ? JSON.stringify(jqXHR.responseJSON, null, 2) : errorThrown)
             );
-        $('#migrate_user_modal').find('.modal_body').append(alert);
+        $('#migrate_user_modal').find('.modal-body').append(alert);
+        console.log('alert added');
         alert.slideDown('fast');
     }
 
