@@ -39,6 +39,13 @@ define([
         check_migration_status();
     };
 
+    const validateEmail = (email) => {
+      return String(email)
+        .toLowerCase()
+        .match(
+          /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+        );
+    };
     var check_migration_status = function() {
         var user = Jupyter.notebook.base_url.split('/')[3];
         $.ajax({
@@ -46,16 +53,36 @@ define([
             type: 'GET',
             success: function(data) {
                 var response = Object.keys(data);
-                if (data.Item !== undefined) {
+                console.log(data.Item);
+                if (data.Item !== undefined && validateEmail(data.Item.email)) {
                     $('#ca-migrate')
                         .css('background-color', 'yellowgreen');
+                }
+                else {
+                    $('#ca-migrate')
+                        .css('background-color', 'yellow');
                 }
             }
         });
     };
 
-    function migrate_dialog() {
+    async function migrate_dialog() {
         var user = Jupyter.notebook.base_url.split('/')[3];
+        let name = undefined;
+        let email = undefined;
+        const result = await $.ajax({
+            url: params.user_table_endpoint + '/items/' + user,
+            type: 'GET',
+            success: function(data) {
+                var response = Object.keys(data);
+                console.log(data.Item);
+                if (data.Item !== undefined) {
+                    name = data.Item.name;
+                    email = data.Item.email;
+                }
+            }
+        });
+        console.log('Email is ' + result);
         var dialog_body = $('<div/>')
             .append(
                 $('<p/>')
@@ -83,8 +110,9 @@ define([
                 .attr('type', 'text')
                 .attr('size', '25')
                 .attr('id', 'callysto-user-email')
-                .attr('placeholder', 'user@example.com')
+                .attr('placeholder', 'Your email')
                 .addClass('form-control')
+                .val((typeof email !== undefined) ? email : undefined)
             )
             .append(
                 $('<p/>')
@@ -97,8 +125,9 @@ define([
                 .attr('type', 'text')
                 .attr('size', '25')
                 .attr('id', 'callysto-user-name')
-                .attr('placeholder', 'Your Name')
+                .attr('placeholder', 'Your name') 
                 .addClass('form-control')
+                .val((typeof name !== undefined) ? name : undefined)
             );
 
 
@@ -132,6 +161,7 @@ define([
                                 $('#migrate').attr('disabled', 'disabled');
                                 $('#done').removeAttr('disabled', 'disabled');
                             });
+                            check_migration_status();
                         }
                     },
                     done: {
