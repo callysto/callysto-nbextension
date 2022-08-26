@@ -20,6 +20,7 @@ define([
     };
 
     var initialize = function() {
+        console.log('Initialize callystonb');
         var action = {
             icon: 'fa-plane',
             handler: migrate_dialog,
@@ -38,7 +39,7 @@ define([
             id: 'ca-migrate'
         }]);
         $('#ca-migrate')
-            .css('background-color', 'yellow');
+            .css('background-color', 'lightpink');
         check_migration_status();
     };
 
@@ -59,11 +60,15 @@ define([
                 console.log(data.Item);
                 if (data.Item !== undefined && validateEmail(data.Item.email)) {
                     $('#ca-migrate')
+                        .css('background-color', 'yellow');
+                    if (data.Item.verified) {
+                    $('#ca-migrate')
                         .css('background-color', 'yellowgreen');
+                    }
                 }
                 else {
                     $('#ca-migrate')
-                        .css('background-color', 'yellow');
+                        .css('background-color', 'lightpink');
                 }
             }
         });
@@ -168,7 +173,10 @@ define([
                         }
                     },
                     done: {
-                        id: 'done'
+                        id: 'done',
+                        click: function() {
+                            check_migration_status();
+                        }
                     }
                 }
             })
@@ -256,6 +264,7 @@ define([
 
     function load_jupyter_extension() {
         promises.app_initialized.then(function(appName) {
+		console.log('here we go!');
             initialize();
             if (appName !== 'NotebookApp') return;
             $('li#download_asciidoc').hide();
