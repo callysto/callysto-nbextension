@@ -5,7 +5,7 @@ define([
     'base/js/promises',
     'base/js/utils',
     'base/js/dialog'
-], function(
+], function (
     requirejs,
     $,
     Jupyter,
@@ -44,32 +44,32 @@ define([
     };
 
     const validateEmail = (email) => {
-        return String(email)
-            .toLowerCase()
-            .match(
-                /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-            );
+      return String(email)
+        .toLowerCase()
+        .match(
+          /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+        );
     };
     var check_migration_status = function() {
         var user = Jupyter.notebook.base_url.split('/')[3];
-        let migrate_status = '<i class="fa fa-question-circle"></i> unknown';
+        let migrate_status = '<i class="fa fa-question-circle"></i> Unready';
         let verification_status = false;
         $.ajax({
             url: params.user_table_endpoint + '/items/' + user,
             type: 'GET',
             success: function(data) {
                 var response = Object.keys(data);
-                verification_status = data.Item.verified;
                 if (data.Item !== undefined && validateEmail(data.Item.email)) {
                     $('#ca-migrate')
                         .css('background-color', 'yellow');
-                    migrate_status = '<i class="fa fa-check-circle"></i> ready';
+                    migrate_status = '<i class="fa fa-check-circle"></i> Ready';
                     if (data.Item.verified) {
-                        $('#ca-migrate')
-                            .css('background-color', 'yellowgreen');
-                        migrate_status = '<i class="fa fa-check-circle"></i> ready and verified';
+                      $('#ca-migrate')
+                        .css('background-color', 'yellowgreen');
+                      migrate_status = '<i class="fa fa-check-circle"></i> Ready and Verified';
                     }
-                } else {
+                }
+                else {
                     $('#ca-migrate')
                         .css('background-color', 'lightpink');
                 }
@@ -80,9 +80,9 @@ define([
                 $('#ca-migrate')
                     .css('background-color', 'yellow');
                 if (verification_status) {
-                    $('#ca-migrate')
-                        .css('background-color', 'yellowgreen');
-                    migrate_status = '<i class="fa fa-check-circle"></i> ready and verified';
+                  $('#ca-migrate')
+                    .css('background-color', 'yellowgreen');
+                  migrate_status = '<i class="fa fa-check-circle"></i> ready and verified';
                 }
                 $('#migration-status').html(migrate_status);
             }
@@ -93,7 +93,7 @@ define([
         var user = Jupyter.notebook.base_url.split('/')[3];
         let name = undefined;
         let email = undefined;
-        let migrate_status = '<i class="fa fa-question-circle"></i> unknown';
+        let migrate_status = '<i class="fa fa-question-circle"></i> Unready';
         const result = await $.ajax({
             url: params.user_table_endpoint + '/items/' + user,
             type: 'GET',
@@ -103,46 +103,85 @@ define([
                     name = data.Item.name;
                     email = data.Item.email;
                     if (data.Item.verified) {
-                        migrate_status = '<i class="fa fa-check-circle"></i> ready and verified';
+                      migrate_status = '<i class="fa fa-check-circle"></i> ready and verified';
                     } else {
-                        migrate_status = '<i class="fa fa-check-circle"></i> ready';
+                      migrate_status = '<i class="fa fa-check-circle"></i> ready';
                     }
                 }
             }
         });
 
         var dialog_body = $('<div/>').attr('id', 'callysto-migrate-dialog')
-            .append(body)
-            .append(controls);
-
-        var body = $('<div/>')
+           .append(body)
+           .append(controls);
+        
+        var body =$('<div/>')
             .css('margin', '1em')
             .css('border', '1px solid lightgray')
             .css('padding', '2rem')
             .appendTo(dialog_body)
-            .append('<h3>Callysto is changing!</h3><p>Callysto is moving to a new infrastructure provider. Our new infrastructure partner will help us help you do bigger and better things with Callysto. As part of the migration process, we would like to help you migrate your files over to the new hub. If you want your files migrated over to the new infrastructure, please fill out the form below to get the process started.')
+            .append(`<h3>Callysto is moving!</h3>
+                    <p>Callysto is moving to a new infrastructure provider. Our
+                    new infrastructure partner will help us help you do bigger
+                    and better things with Callysto. As part of the migration
+                    process, we would like to help you migrate your files over
+                    to the new hub. If you want your files migrated over to the
+                    new infrastructure, please fill out the form below to get
+                    the process started.</p>
+                    <br/>
+                    <p>Your migration status is shown below. There are three possible
+                    values:</p>
+                    <p>&nbsp;</p>
+                    <table class="table">
+                      <tbody>
+                        <tr>
+                          <th scope="row"><i class="fa fa-plane fa-lg" style="background-color:yellowgreen; padding:0.75rem"></i></th>
+                          <td>Ready and verified</td>
+                          <td>You're all set! We have everything we need to
+                          help you migrate your files.</td>
+                        </tr>
+                        <tr>
+                          <th scope="row"><i class="fa fa-plane fa-lg" style="background-color:yellow; padding:0.75rem"></i></th>
+                          <td>Ready</td>
+                          <td> For some account types (e.g.  Microsoft logins)
+                          we might need to perform additional manual
+                          verification steps before moving your files. If we
+                          need more information we will contact you at the
+                          address you have submitted, otherwise, you're all
+                          set!</td>
+                        </tr>
+                        <tr>
+                          <th scope="row"><i class="fa fa-plane fa-lg" style="background-color:lightpink; padding:0.75rem"></i></th>
+                          <td>Unready</td>
+                          <td>We don't yet have your migration details. Please
+                          fill in the from below and hit the Migration button to
+                          start the migration process.</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    `)
             .append(
-                $('<div/>')
+              $('<div/>')
                 .addClass('row justify-content-md-center migration-report')
                 .append(
-                    $('<div/>')
+                  $('<div/>')
                     .css('margin-top', '2rem')
                     .css('margin-bottom', '1rem')
                     .css('font-size', '125%')
-                    .addClass('col-sm-6 col-sm-offset-3')
+                      .addClass('col-sm-6 col-sm-offset-3')
+                   .append(
+                      $('<span>Migration Status: </span>')
+                  )
+                  .append(
+                    $('<span/>')
+                    .addClass('ca-migrate-status')
+                    .attr('id', 'ca-migrate-status')
                     .append(
-                        $('<span>Migration Status: </span>')
+                      $('<i/>')
+                      .addClass('fa fa-lg')
                     )
-                    .append(
-                        $('<span/>')
-                        .addClass('ca-migrate-status')
-                        .attr('id', 'ca-migrate-status')
-                        .append(
-                            $('<i/>')
-                            .addClass('fa fa-lg')
-                        )
-                        .html(migrate_status)
-                    )
+                    .html(migrate_status)
+                  )
                 )
             );
 
@@ -153,75 +192,75 @@ define([
         $('<div/>')
             .appendTo(controls)
             .append(
-                $('<label/>')
-                .attr('for', 'callysto-user-hash')
-                .text('User hash')
+               $('<label/>')
+                 .attr('for', 'callysto-user-hash')
+                 .text('User hash')
             ).append(
-                $('<input/>')
-                .addClass('form-control')
-                .attr('id', 'callysto-user-hash')
-                .val(user)
-                .prop('readonly', true)
+               $('<input/>')
+                 .addClass('form-control')
+                 .attr('id', 'callysto-user-hash')
+                 .val(user)
+                 .prop('readonly', true)
             );
 
-        $('<div/>')
+         $('<div/>')
             .addClass('has-feedback')
             .appendTo(controls)
             .append(
-                $('<label/>')
-                .attr('for', 'callysto-user-email')
-                .text('User Email')
+               $('<label/>')
+                 .attr('for', 'callysto-user-email')
+                 .text('User Email')
             ).append(
-                $('<input/>')
-                .addClass('form-control')
-                .attr('id', 'callysto-user-email')
-                .attr('placeholder', 'Your email')
-                .val((typeof email !== undefined) ? email : undefined)
+               $('<input/>')
+                  .addClass('form-control')
+                  .attr('id', 'callysto-user-email')
+                  .attr('placeholder', 'Your email')
+                  .val((typeof email !== undefined) ? email : undefined)
             ).append(
-                $('<span/>')
-                .addClass('form-control-feedback')
-                .append(
+               $('<span/>')
+                 .addClass('form-control-feedback')
+                 .append(
                     $('<i/>')
                     .addClass('fa fa-lg')
                 )
             ).append(
-                $('<span/>')
+              $('<span/>')
                 .addClass('help-block')
             );
 
 
-        $('<div/>')
+          $('<div/>')
             .addClass('has-feedback')
             .appendTo(controls)
             .append(
                 $('<label/>')
-                .attr('for', 'callysto-user-name')
-                .text('Your name')
+                  .attr('for', 'callysto-user-name')
+                  .text('Your name')
             ).append(
                 $('<input/>')
                 .addClass('form-control')
                 .attr('id', 'callysto-user-name')
-                .attr('placeholder', 'Your name')
+                .attr('placeholder', 'Your name') 
                 .val((typeof name !== undefined) ? name : undefined)
             ).append(
-                $('<span/>')
+              $('<span/>')
                 .addClass('form-control-feedback')
                 .append(
                     $('<i/>')
                     .addClass('fa fa-lg')
-                )
+              )
             ).append(
-                $('<span/>')
+              $('<span/>')
                 .addClass('help-block')
             );
 
-        var form_groups = controls.children('div').addClass('form-group');
+        var form_groups = controls.children('div').addClass('form-group'); 
         form_groups
             .children('label')
-            .addClass('col-sm-2 control-label')
-            .css('padding-right', '1em');
+                .addClass('col-sm-2 control-label')
+                .css('padding-right', '1em');
         form_groups
-            .each(function(index, elem) {
+            .each(function (index, elem) {
                 $('<div/>')
                     .appendTo(elem)
                     .addClass('col-sm-10')
@@ -248,8 +287,8 @@ define([
                             $.extend(
                                 new_data
                             );
-
-
+                          
+                            
                             // prevent the modal from closing to show status
                             $('.btn-primary').removeAttr('data-dismiss');
                             migrate_user(function(jqXHR, textStatus) {
