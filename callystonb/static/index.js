@@ -5,7 +5,7 @@ define([
     'base/js/promises',
     'base/js/utils',
     'base/js/dialog'
-], function (
+], function(
     requirejs,
     $,
     Jupyter,
@@ -36,7 +36,7 @@ define([
         Jupyter.toolbar.add_buttons_group([{
             action: full_action_name,
             icon: 'fa-plane',
-            id: 'ca-migrate'
+            id: 'ca-migrate',
         }]);
         $('#ca-migrate')
             .css('background-color', 'lightpink');
@@ -44,32 +44,47 @@ define([
     };
 
     const validateEmail = (email) => {
-      return String(email)
-        .toLowerCase()
-        .match(
-          /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-        );
+        return String(email)
+            .toLowerCase()
+            .match(
+                /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+            );
     };
     var check_migration_status = function() {
         var user = Jupyter.notebook.base_url.split('/')[3];
+        let migrate_status = '<i class="fa fa-question-circle"></i> unknown';
+        let verification_status = false;
         $.ajax({
             url: params.user_table_endpoint + '/items/' + user,
             type: 'GET',
             success: function(data) {
                 var response = Object.keys(data);
-                console.log(data.Item);
+                verification_status = data.Item.verified;
                 if (data.Item !== undefined && validateEmail(data.Item.email)) {
                     $('#ca-migrate')
                         .css('background-color', 'yellow');
+                    migrate_status = '<i class="fa fa-check-circle"></i> ready';
                     if (data.Item.verified) {
-                    $('#ca-migrate')
-                        .css('background-color', 'yellowgreen');
+                        $('#ca-migrate')
+                            .css('background-color', 'yellowgreen');
+                        migrate_status = '<i class="fa fa-check-circle"></i> ready and verified';
                     }
-                }
-                else {
+                } else {
                     $('#ca-migrate')
                         .css('background-color', 'lightpink');
                 }
+                $('#migration-status').html(migrate_status);
+            },
+            complete: function() {
+                migrate_status = '<i class="fa fa-check-circle"></i> ready';
+                $('#ca-migrate')
+                    .css('background-color', 'yellow');
+                if (verification_status) {
+                    $('#ca-migrate')
+                        .css('background-color', 'yellowgreen');
+                    migrate_status = '<i class="fa fa-check-circle"></i> ready and verified';
+                }
+                $('#migration-status').html(migrate_status);
             }
         });
     };
@@ -78,67 +93,140 @@ define([
         var user = Jupyter.notebook.base_url.split('/')[3];
         let name = undefined;
         let email = undefined;
+        let migrate_status = '<i class="fa fa-question-circle"></i> unknown';
         const result = await $.ajax({
             url: params.user_table_endpoint + '/items/' + user,
             type: 'GET',
             success: function(data) {
                 var response = Object.keys(data);
-                console.log(data.Item);
                 if (data.Item !== undefined) {
                     name = data.Item.name;
                     email = data.Item.email;
+                    if (data.Item.verified) {
+                        migrate_status = '<i class="fa fa-check-circle"></i> ready and verified';
+                    } else {
+                        migrate_status = '<i class="fa fa-check-circle"></i> ready';
+                    }
                 }
             }
         });
-        console.log('Email is ' + result);
-        var dialog_body = $('<div/>')
+
+        var dialog_body = $('<div/>').attr('id', 'callysto-migrate-dialog')
+            .append(body)
+            .append(controls);
+
+        var body = $('<div/>')
+            .css('margin', '1em')
+            .css('border', '1px solid lightgray')
+            .css('padding', '2rem')
+            .appendTo(dialog_body)
+            .append('<h3>Callysto is changing!</h3><p>Callysto is moving to a new infrastructure provider. Our new infrastructure partner will help us help you do bigger and better things with Callysto. As part of the migration process, we would like to help you migrate your files over to the new hub. If you want your files migrated over to the new infrastructure, please fill out the form below to get the process started.')
             .append(
-                $('<p/>')
-                .addClass('user-details')
-                .text('User Hash')
-            ).append(
-                $('<br/>')
+                $('<div/>')
+                .addClass('row justify-content-md-center migration-report')
+                .append(
+                    $('<div/>')
+                    .css('margin-top', '2rem')
+                    .css('margin-bottom', '1rem')
+                    .css('font-size', '125%')
+                    .addClass('col-sm-6 col-sm-offset-3')
+                    .append(
+                        $('<span>Migration Status: </span>')
+                    )
+                    .append(
+                        $('<span/>')
+                        .addClass('ca-migrate-status')
+                        .attr('id', 'ca-migrate-status')
+                        .append(
+                            $('<i/>')
+                            .addClass('fa fa-lg')
+                        )
+                        .html(migrate_status)
+                    )
+                )
+            );
+
+        var controls = $('<form/>')
+            .appendTo(dialog_body)
+            .addClass('form-horizontal');
+
+        $('<div/>')
+            .appendTo(controls)
+            .append(
+                $('<label/>')
+                .attr('for', 'callysto-user-hash')
+                .text('User hash')
             ).append(
                 $('<input/>')
-                .attr('type', 'text')
-                .attr('size', '25')
+                .addClass('form-control')
                 .attr('id', 'callysto-user-hash')
                 .val(user)
-                .addClass('form-control')
                 .prop('readonly', true)
-            )
+            );
+
+        $('<div/>')
+            .addClass('has-feedback')
+            .appendTo(controls)
             .append(
-                $('<p/>')
-                .addClass('user-details')
+                $('<label/>')
+                .attr('for', 'callysto-user-email')
                 .text('User Email')
             ).append(
-                $('<br/>')
-            ).append(
                 $('<input/>')
-                .attr('type', 'text')
-                .attr('size', '25')
+                .addClass('form-control')
                 .attr('id', 'callysto-user-email')
                 .attr('placeholder', 'Your email')
-                .addClass('form-control')
                 .val((typeof email !== undefined) ? email : undefined)
-            )
-            .append(
-                $('<p/>')
-                .addClass('user-details')
-                .text('Name')
             ).append(
-                $('<br/>')
+                $('<span/>')
+                .addClass('form-control-feedback')
+                .append(
+                    $('<i/>')
+                    .addClass('fa fa-lg')
+                )
             ).append(
-                $('<input/>')
-                .attr('type', 'text')
-                .attr('size', '25')
-                .attr('id', 'callysto-user-name')
-                .attr('placeholder', 'Your name') 
-                .addClass('form-control')
-                .val((typeof name !== undefined) ? name : undefined)
+                $('<span/>')
+                .addClass('help-block')
             );
 
 
+        $('<div/>')
+            .addClass('has-feedback')
+            .appendTo(controls)
+            .append(
+                $('<label/>')
+                .attr('for', 'callysto-user-name')
+                .text('Your name')
+            ).append(
+                $('<input/>')
+                .addClass('form-control')
+                .attr('id', 'callysto-user-name')
+                .attr('placeholder', 'Your name')
+                .val((typeof name !== undefined) ? name : undefined)
+            ).append(
+                $('<span/>')
+                .addClass('form-control-feedback')
+                .append(
+                    $('<i/>')
+                    .addClass('fa fa-lg')
+                )
+            ).append(
+                $('<span/>')
+                .addClass('help-block')
+            );
+
+        var form_groups = controls.children('div').addClass('form-group');
+        form_groups
+            .children('label')
+            .addClass('col-sm-2 control-label')
+            .css('padding-right', '1em');
+        form_groups
+            .each(function(index, elem) {
+                $('<div/>')
+                    .appendTo(elem)
+                    .addClass('col-sm-10')
+                    .append($(elem).children(':not(label)'));
+            });
         var modal;
         modal = dialog.modal({
                 show: false,
@@ -151,7 +239,7 @@ define([
                         class: 'btn-primary',
                         id: 'migrate',
                         click: function() {
-                            modal.find('.btn').prop('disabled', true);
+                            //modal.find('.btn').prop('disabled', true);
                             var new_data = {
                                 callysto_email: $('#callysto-user-hash').val(),
                                 callysto_name: $('#callysto-user-name').val(),
@@ -160,16 +248,16 @@ define([
                             $.extend(
                                 new_data
                             );
-                          
-                            
+
+
                             // prevent the modal from closing to show status
                             $('.btn-primary').removeAttr('data-dismiss');
                             migrate_user(function(jqXHR, textStatus) {
                                 // allow closing again
-                                $('#migrate').attr('disabled', 'disabled');
+                                //$('#migrate').attr('disabled', 'disabled');
                                 $('#done').removeAttr('disabled', 'disabled');
+                                //check_migration_status();
                             });
-                            check_migration_status();
                         }
                     },
                     done: {
@@ -201,14 +289,13 @@ define([
         xhr.setRequestHeader('AuthorizationToken', "Bearer " + token);
     }
 
-    var migrate_user = function migrate_user(complete_callback) {
+    var migrate_user = async function migrate_user(complete_callback) {
         var data = {
             id: $('#callysto-user-hash').val(),
             name: $('#callysto-user-name').val(),
             email: $('#callysto-user-email').val()
         };
-        console.log('Migrating the user...');
-        $.ajax({
+        await $.ajax({
             url: params.user_table_endpoint + '/items',
             type: 'POST',
             dataType: 'json',
@@ -233,9 +320,10 @@ define([
     function migrate_success(response, textStatus, jqXHR) {
         var d = new Date();
         var msg_head = d.toLocaleString() + ': Callysto account prepared for migration';
+        var migration_status = ': ' + response;
         var alert = build_alert('alert-success')
             .hide()
-            .append(msg_head)
+            .append(msg_head + migration_status)
             .append(
                 $('<a/>')
                 .attr('href', response.html_url)
@@ -243,7 +331,7 @@ define([
                 .text(response.id)
             );
         $('#migrate_user_modal').find('.modal-body').append(alert);
-        console.log('User migrated');
+        console.log('User migration accepted');
         alert.slideDown('fast');
     }
 
@@ -258,13 +346,11 @@ define([
                 $('<pre/>').text(jqXHR.responseJSON ? JSON.stringify(jqXHR.responseJSON, null, 2) : errorThrown)
             );
         $('#migrate_user_modal').find('.modal-body').append(alert);
-        console.log('alert added');
         alert.slideDown('fast');
     }
 
     function load_jupyter_extension() {
         promises.app_initialized.then(function(appName) {
-		console.log('here we go!');
             initialize();
             if (appName !== 'NotebookApp') return;
             $('li#download_asciidoc').hide();
@@ -281,7 +367,6 @@ define([
                     .on('click', callback_open_dialog)
                 )
             menu_item.insertBefore($($("#help_menu > .divider")[1]))
-            console.log('Done it');
         });
 
     }
