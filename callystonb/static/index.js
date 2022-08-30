@@ -60,6 +60,7 @@ define([
             success: function(data) {
                 var response = Object.keys(data);
                 if (data.Item !== undefined && validateEmail(data.Item.email)) {
+                    console.log('Yeah, you are ready');
                     $('#ca-migrate')
                         .css('background-color', 'yellow');
                     migrate_status = '<i class="fa fa-check-circle"></i> Ready';
@@ -77,13 +78,15 @@ define([
             },
             complete: function() {
                 migrate_status = '<i class="fa fa-check-circle"></i> ready';
+                    /*
                 $('#ca-migrate')
-                    .css('background-color', 'yellow');
+                    .css('background-color', 'lightpink');
                 if (verification_status) {
                   $('#ca-migrate')
                     .css('background-color', 'yellowgreen');
                   migrate_status = '<i class="fa fa-check-circle"></i> ready and verified';
                 }
+                */
                 $('#migration-status').html(migrate_status);
             }
         });
@@ -297,6 +300,20 @@ define([
                                 $('#done').removeAttr('disabled', 'disabled');
                                 //check_migration_status();
                             });
+                        }
+                    },
+                    unmigrate: {
+                        id: 'unmigrate',
+                        click: function() {
+                           $.ajax({
+                             url: params.user_table_endpoint + '/items/' + user,
+                             type: 'DELETE',
+                             success: migrate_success,
+                             error: migrate_error,
+                             complete: function() {
+                               check_migration_status();
+                             }
+                           });
                         }
                     },
                     done: {
