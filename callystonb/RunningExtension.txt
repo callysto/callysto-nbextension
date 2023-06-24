@@ -1,0 +1,12 @@
+Below are the steps required to run these extensions on an jupyter notebook instance:
+
+1.  Install jupyter_contrib_nbextension & jupyter_nbextensions_configurator.
+        - Once installed, make sure that you see a new tab available on jupyter notebook called "NBextensions".
+
+2. Navigate to where you have installed Jupyter and find the "NBextensions" directory.
+
+3. Copy and paste the Extensions found in this project into that folder.
+
+4. Run Jupyter notebook and make sure that the extensions are enabled (click on the "NBextensions" tab and make sure the extension is checked).
+
+5. Create a new notebook and the extension should be working.
