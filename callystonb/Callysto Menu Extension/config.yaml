@@ -1,0 +1,7 @@
+Type: Jupyter Notebook Extension
+Name: Callysto Menu
+Description: |
+  Add a customizable menu item to insert code and markdown snippets.
+Main: main.js
+Compatibility: 4.x, 5.x, 6.x
+Parameters:
