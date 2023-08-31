@@ -1,0 +1,13 @@
+Turtle.js is the backend and contains the paper.js library. 
+Anywidget doesn't seem to be able to handle imports so I had to add the whole library
+The turtledrawing function is what is responsible for creating the visuals that students see.
+
+
+The Callysto Hub doesn't have "Anywidget" installed so you will need to pip install it.
+
+
+Currently here are the areas that still need to be worked on:
+- The turtle doesn't move. This might be due to there not being any update function in "turtle.js" (that I'm aware of). 
+- Currently when you try and read the points the turtle has to go to model.get("points") works but you cannot assign it to anything.
+- Move the Turtle class to its own init file so it's not in the frontend where user's can see it
+- Test to make sure that all functions works like previously
